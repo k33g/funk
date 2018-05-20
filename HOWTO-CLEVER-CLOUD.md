@@ -24,9 +24,9 @@
 
 ```shell
 JAVA_VERSION=8
-FUNK_TOKEN="panda"
+FUNK_TOKEN=panda
 PORT=8080
-SERVICE_HOST="funk.cleverapps.io"
+SERVICE_HOST=funk.cleverapps.io
 SERVICE_PORT=80
 ```
 
