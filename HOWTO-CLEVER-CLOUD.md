@@ -1,19 +1,8 @@
+# Deploy FunK on Clever Cloud
 
+Cleve-Clous is a PaaS: [https://www.clever-cloud.com/](https://www.clever-cloud.com/)
 
-## First: on the repository side
-
-- create a directory `clevercloud`
-- add a `maven.json` in this directory with this content:
-
-```json
-{
-  "deploy": {
-    "goal": "install exec:java"
-  }
-}
-```
-
-## Second: on the Clever Cloud side
+## On the Clever Cloud side
 
 - create an application (you need to be registered), eg: *Create an application from a Github repository* if your project is on GitHub
 - it's a *Java+Maven* application
@@ -23,6 +12,7 @@
 - Setup the environment variables:
 
 ```shell
+CC_MAVEN_GOAL=install exec:java
 JAVA_VERSION=8
 FUNK_TOKEN=panda
 PORT=8080
