@@ -1,10 +1,10 @@
-# Funk
+# FunK
 
-**Funk** is a **scalable** function provider (think to kind of small FaaS)
+**FunK** is a **scalable** function provider (think to kind of small FaaS)
 
-:warning: don't use **Funk** in production: for now, it's a proof of concept
+:warning: don't use **FunK** in production: for now, it's a proof of concept
 
-**Funk** is a [Bots.Garden](http://www.bots.garden/) project
+**FunK** is a [Bots.Garden](http://www.bots.garden/) project
 
 ## Prerequisites
 
