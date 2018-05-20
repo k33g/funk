@@ -1,6 +1,6 @@
 # FunK
 
-**FunK** is a **scalable** function provider (think to kind of small FaaS)
+**FunK** is a **scalable** function provider (think to a kind of small FaaS)
 
 :warning: don't use **FunK** in production: for now, it's a proof of concept
 
