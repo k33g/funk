@@ -51,3 +51,20 @@ curl --header "funk-token: panda" -H "Content-Type: application/json" -X POST ht
 }
 EOF
 ```
+
+> the first compilation could take some seconds
+
+## Run your first function
+
+```shell
+curl --header "funk-token: panda" -H "Content-Type: application/json" -X POST http://funk.cleverapps.io/funk/kt/run \
+-d @- <<'EOF'
+{
+  "name":"sum",
+  "parameters":{
+    "a": 38,
+    "b": 4
+  }
+}
+EOF
+```
