@@ -54,6 +54,10 @@ public class Data {
         if(discovery==null) {
             ServiceDiscoveryOptions serviceDiscoveryOptions = new ServiceDiscoveryOptions();
             JsonObject config = new JsonObject();
+
+            config.put("host", redisHost).put("port", redisPort).put("auth", redisAuth);
+            //.put("key", redisRecordsKey)
+
             discovery = ServiceDiscovery.create(vertx, serviceDiscoveryOptions.setBackendConfiguration(config));
         }
 

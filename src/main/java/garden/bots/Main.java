@@ -21,6 +21,10 @@ public class Main {
 
     Vertx vertx = io.vertx.rxjava.core.Vertx.vertx();
 
+
+
+
+
     //https://vertx.io/docs/vertx-redis-client/java/#_redis_sentinel
     vertx.eventBus().<JsonObject>consumer("io.vertx.redis.changes", received -> {
       JsonObject value = received.body().getJsonObject("value");
