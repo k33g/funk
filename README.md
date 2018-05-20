@@ -72,10 +72,6 @@ SERVICE_PORT=80 \
 mvn install exec:java
 ```
 
-> :wave: you don't need the `clevercloud/maven.json`, I just use it to deploy on [https://www.clever-cloud.com/](https://www.clever-cloud.com/)
-
-
-
 ## Functions
 
 Each function, for a language, has a unique identifier: **its name**, so
