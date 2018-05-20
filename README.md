@@ -10,6 +10,7 @@
 
 - Java 8
 - Redis database
+- Maven
 
 ## Run it
 
@@ -61,6 +62,10 @@ SERVICE_HOST="localhost" \
 SERVICE_PORT=80 \
 mvn install exec:java
 ```
+
+> :wave: you don't need the `clevercloud/maven.json`, I just use it to deploy on [https://www.clever-cloud.com/](https://www.clever-cloud.com/)
+
+
 
 ## Functions
 
