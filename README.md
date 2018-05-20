@@ -2,6 +2,8 @@
 
 **FunK** is a **scalable** function provider (think to a kind of small FaaS)
 
+> :wave: **FunK** is "cloud provider **agnostic**", you can deploy **FunK** where you want. You don't need Kubernetes or Docker, but you can if you want.
+
 **FunK** provides:
 
 - JavaScript functions

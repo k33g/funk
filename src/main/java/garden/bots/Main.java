@@ -6,7 +6,6 @@ import garden.bots.engines.KTEngine;
 import io.vertx.rxjava.core.Vertx;
 import me.atrox.haikunator.Haikunator;
 import me.atrox.haikunator.HaikunatorBuilder;
-import net.redpipe.engine.core.AppGlobals;
 import net.redpipe.engine.core.Server;
 import io.vertx.core.json.JsonObject;
 
@@ -20,10 +19,6 @@ public class Main {
     config.put("http_port", httport);
 
     Vertx vertx = io.vertx.rxjava.core.Vertx.vertx();
-
-
-
-
 
     //https://vertx.io/docs/vertx-redis-client/java/#_redis_sentinel
     vertx.eventBus().<JsonObject>consumer("io.vertx.redis.changes", received -> {
