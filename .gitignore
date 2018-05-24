@@ -4,3 +4,5 @@ target/*
 target/*
 *.iml
 sandbox/*
+tools-for-devs/node_modules/*
+*.rdb
