@@ -15,7 +15,9 @@
 
 :warning: don't use **FunK** in production: for now, it's a proof of concept
 
-**FunK** is a [Bots.Garden](http://www.bots.garden/) project
+**FunK** is a [Bots.Garden](http://www.bots.garden/) production
+
+> At the end of POC, Funk will move there: [https://github.com/funk-platform](https://github.com/funk-platform)
 
 ## Prerequisites
 
