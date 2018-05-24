@@ -20,6 +20,7 @@ import garden.bots.engines.JSEngine;
 
 import java.util.Map;
 
+
 @Path("/funk/js")
 public class JSFunctionsResource {
 
@@ -85,8 +86,8 @@ public class JSFunctionsResource {
     Function1<Record, Boolean> filterAllFunctions = record -> record.getMetadata().getString("kind").equals("js");
 
     return  Check.token(funkToken).isSuccess()
-              ? Data.functionsList(vertx, filterAllFunctions)
-              : SingleJson.error("Bad token");
+      ? Data.functionsList(vertx, filterAllFunctions)
+      : SingleJson.error("Bad token");
 
   }
 
@@ -110,16 +111,16 @@ public class JSFunctionsResource {
     return Data.searchFunction(vertx, filterFunction,
       /* ----- the function does not exist => create ----- */
       () -> JSEngine.compile( /* ----- compilation ----- */
-                  sourceCode,
-                  compilationError -> SingleJson.error(compilationError.getMessage()),
-                  compilationSuccess -> Check.token(funkToken).isSuccess()
-                          ? Data.createFunction(vertx, recordFunction)
-                          : SingleJson.error("Bad token")
+        sourceCode,
+        compilationError -> SingleJson.error(compilationError.getMessage()),
+        compilationSuccess -> Check.token(funkToken).isSuccess()
+          ? Data.createFunction(vertx, recordFunction)
+          : SingleJson.error("Bad token")
       ),
       /* ----- the function already exists ----- */
       record -> Check.token(funkToken).isSuccess()
-                  ? SingleJson.error("This function already exists, you must use update")
-                  : SingleJson.error("Bad token")
+        ? SingleJson.error("This function already exists, you must use update")
+        : SingleJson.error("Bad token")
     );
   }
 
@@ -138,33 +139,33 @@ public class JSFunctionsResource {
       funkToken,
       () -> SingleJson.error("Bad token"),
       () -> Data.searchFunction(vertx, filterFunction,
-              /* ----- the function does not exist ----- */
-              () -> SingleJson.error("This function does not exist, you must use create"),
-              /* ----- the function already exists ----- */
-              recordFunction -> {
-                /* ----- update record ----- */
-                Record record = Data.updateRecord(recordFunction, description, sourceCode);
-                /* ----- compilation ----- */
-                return JSEngine.compile(
-                          sourceCode,
-                          compilationError -> SingleJson.error(compilationError.getMessage()),
-                          compilationSuccess -> {
-                            /* ----- notify the other instances ----- */
-                            JsonObject message = new JsonObject()
-                              .put("what", "update")
-                              .put("name", functionName)
-                              .put("kind", "js")
-                              .put("code", sourceCode)
-                              .put("sender", Data.instanceName());
+        /* ----- the function does not exist ----- */
+        () -> SingleJson.error("This function does not exist, you must use create"),
+        /* ----- the function already exists ----- */
+        recordFunction -> {
+          /* ----- update record ----- */
+          Record record = Data.updateRecord(recordFunction, description, sourceCode);
+          /* ----- compilation ----- */
+          return JSEngine.compile(
+            sourceCode,
+            compilationError -> SingleJson.error(compilationError.getMessage()),
+            compilationSuccess -> {
+              /* ----- notify the other instances ----- */
+              JsonObject message = new JsonObject()
+                .put("what", "update")
+                .put("name", functionName)
+                .put("kind", "js")
+                .put("code", sourceCode)
+                .put("sender", Data.instanceName());
 
-                            Data.redis(vertx).publish("changes", message.encode(),res -> {
-                                //TODO if (res.succeeded()) {}
-                            });
-                            return Data.updateFunction(vertx, record);
-                          }
-                );
-              }
-          )
+              Data.redis(vertx).publish("changes", message.encode(),res -> {
+                //TODO if (res.succeeded()) {}
+              });
+              return Data.updateFunction(vertx, record);
+            }
+          );
+        }
+      )
     );
   }
 
