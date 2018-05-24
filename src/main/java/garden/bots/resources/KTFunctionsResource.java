@@ -7,6 +7,7 @@ import garden.bots.singles.SingleJson;
 import garden.bots.token.Check;
 import io.vavr.Function0;
 import io.vavr.Function1;
+import io.vavr.control.Option;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rxjava.core.Vertx;
 import io.vertx.servicediscovery.Record;
@@ -24,45 +25,49 @@ public class KTFunctionsResource {
     @Path("/run")
     @POST
     public Single<JsonObject> run(@Context Vertx vertx, @HeaderParam("funk-token") String funkToken, JsonObject data) {
-        String functionName = data.getString("name");
-        Map parameters = data.getJsonObject("parameters").getMap();
+      //TODO: manage errors
+      String functionName = data.getString("name");
 
-        Function1<Record, Boolean> filterFunction = record -> record.getName().equals(data.getString("name")) && record.getMetadata().getString("kind").equals("kt");
+      /* ----- if no parameters ----- */
+      Option<JsonObject> optionalParameters = Option.of(data.getJsonObject("parameters"));
+      Map parameters = optionalParameters.getOrElse(new JsonObject()).getMap();
 
-        Function1<Throwable, Single<JsonObject>> newExecutionKO = (error) -> SingleJson.error(error.getCause().getMessage());
+      Function1<Record, Boolean> filterFunction = record -> record.getName().equals(data.getString("name")) && record.getMetadata().getString("kind").equals("kt");
 
-        Function1<JsonObject, Single<JsonObject>> newExecutionOK = (executionResult) -> SingleJson.result(executionResult.getValue("result"));
+      Function1<Throwable, Single<JsonObject>> newExecutionKO = (error) -> SingleJson.error(error.getCause().getMessage());
 
-        Function1<Throwable, Single<JsonObject>> executionKO = (error) -> {
-            /* ----- function does not exist in memory ----- */
-            System.out.println("==============================================");
-            System.out.println(" Execution error of " + functionName + "(kt)");
-            System.out.println(" Trying to evaluate again the function...");
-            System.out.println("==============================================");
+      Function1<JsonObject, Single<JsonObject>> newExecutionOK = (executionResult) -> SingleJson.result(executionResult.getValue("result"));
 
-            /* ----- search the function ----- */
+      Function1<Throwable, Single<JsonObject>> executionKO = (error) -> {
+        /* ----- function does not exist in memory ----- */
+        System.out.println("==============================================");
+        System.out.println(" Execution error of " + functionName + "(kt)");
+        System.out.println(" Trying to evaluate again the function...");
+        System.out.println("==============================================");
 
-            return Data.searchFunction(vertx, filterFunction,
-                    () -> SingleJson.error("the function does not exists"),
-                    /* ----- the function exists in the backen but not in memory, so we need to compile it ----- */
-                    /* ----- compilation ----- */
-                    record -> KTEngine.compile(
-                            record.getMetadata().getString("code"),
-                            compilationError -> SingleJson.error(compilationError.getCause().getMessage()),
-                            /* ----- execution [again] ----- */
-                            compilationSuccess -> KTEngine.execute(functionName, parameters, newExecutionKO, newExecutionOK)
-                    )
-            );
+        /* ----- search the function ----- */
 
-        };
+        return Data.searchFunction(vertx, filterFunction,
+          () -> SingleJson.error("the function does not exists"),
+          /* ----- the function exists in the backend but not in memory, so we need to compile it ----- */
+          /* ----- compilation ----- */
+          record -> KTEngine.compile(
+            record.getMetadata().getString("code"),
+            compilationError -> SingleJson.error(compilationError.getCause().getMessage()),
+            /* ----- execution [again] ----- */
+            compilationSuccess -> KTEngine.execute(functionName, parameters, newExecutionKO, newExecutionOK)
+          )
+        );
 
-        Function1<JsonObject, Single<JsonObject>> executionOK = (executionResult) -> SingleJson.result(executionResult.getValue("result"));
+      };
 
-        Function0<Single<JsonObject>> tokenKO = () -> SingleJson.error("Bad token");
+      Function1<JsonObject, Single<JsonObject>> executionOK = (executionResult) -> SingleJson.result(executionResult.getValue("result"));
 
-        Function0<Single<JsonObject>> tokenOK = () -> KTEngine.execute(functionName, parameters, executionKO, executionOK);
+      Function0<Single<JsonObject>> tokenKO = () -> SingleJson.error("Bad token");
 
-        return Check.token(funkToken, tokenKO, tokenOK);
+      Function0<Single<JsonObject>> tokenOK = () -> KTEngine.execute(functionName, parameters, executionKO, executionOK);
+
+      return Check.token(funkToken, tokenKO, tokenOK);
 
     }
 

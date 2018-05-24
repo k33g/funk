@@ -36,12 +36,33 @@ public class JSEngine {
     }
 
     public static Single<JsonObject> execute(String functionName, Map<String, Object> parameters, Function1<Throwable, Single<JsonObject>> failure, Function1<ScriptObjectMirror, Single<JsonObject>> success) {
-        Try<ScriptObjectMirror> execution = Try.of(() -> (ScriptObjectMirror) inv.invokeFunction(functionName, parameters));
 
-        if(execution.isFailure()) {
-            return failure.apply(execution.getCause());
-        } else {
-            return success.apply(execution.get());
-        }
+      Try<ScriptObjectMirror> execution;
+
+      if(parameters.size() == 0) {
+        System.out.println("=========== Execution without parameter ===========");
+        System.out.println(" - parameters: " + parameters);
+        System.out.println(" - size: " + parameters.size());
+        System.out.println("===================================================");
+
+        execution = Try.of(() -> (ScriptObjectMirror) inv.invokeFunction(functionName));
+
+      } else {
+        System.out.println("=========== Execution with parameters =============");
+        System.out.println(" - parameters: " + parameters);
+        System.out.println(" - size: " + parameters.size());
+        System.out.println("===================================================");
+
+        execution = Try.of(() -> (ScriptObjectMirror) inv.invokeFunction(functionName, parameters));
+      }
+
+      if(execution.isFailure()) {
+        System.out.println("============[😡 JavaScript Error]==================");
+        System.out.println(execution.getCause().getMessage());
+        System.out.println("===================================================");
+        return failure.apply(execution.getCause());
+      } else {
+        return success.apply(execution.get());
+      }
     }
 }

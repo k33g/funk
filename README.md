@@ -77,6 +77,7 @@ mvn install exec:java
 Each function, for a language, has a unique identifier: **its name**, so
 
 - :warning: you can create only one `hello` JavaScript function
+  - :wave: btw, it's convenient if you want to call various versions from an other function
 - but you can create one `hello` JavaScript function and one `hello` Kotlin function
 - if you need several version use something like that: `hello_v_101`
  
