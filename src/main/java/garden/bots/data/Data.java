@@ -118,8 +118,9 @@ public class Data {
     return Data.discovery(vertx).rxPublish(recordFunction).map(publishedRecord -> publishedRecord.toJson());
   }
 
-  public static Record updateRecord(Record record, String description, String code) {
+  public static Record updateRecord(Record record, String description, String code, JsonArray dependencies) {
     record.getMetadata().put("description", description).put("code", code);
+    record.getMetadata().put("dependencies",  dependencies);
     return record;
   }
 }

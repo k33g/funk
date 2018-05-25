@@ -2,6 +2,7 @@ package garden.bots.engines;
 
 import io.vavr.Function1;
 import io.vavr.control.Try;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
@@ -17,11 +18,11 @@ public class JSEngine {
 
   private static Invocable inv = (Invocable) engine;
 
-  public static Try<Object> compile(String sourceCode) {
+  public static Try<Object> compile(String sourceCode, JsonArray dependencies) {
       return Try.of(() -> engine.eval(sourceCode));
   };
 
-  public static Single<JsonObject> compile(String sourceCode, Function1<Throwable, Single<JsonObject>> failure, Function1<Object, Single<JsonObject>> success) {
+  public static Single<JsonObject> compile(String sourceCode, JsonArray dependencies, Function1<Throwable, Single<JsonObject>> failure, Function1<Object, Single<JsonObject>> success) {
     Try<Object> compilation = Try.of(() -> engine.eval(sourceCode));
 
     if(compilation.isFailure()) {
