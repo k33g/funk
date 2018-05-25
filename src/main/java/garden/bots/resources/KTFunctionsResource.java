@@ -8,6 +8,7 @@ import garden.bots.token.Check;
 import io.vavr.Function0;
 import io.vavr.Function1;
 import io.vavr.control.Option;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rxjava.core.Vertx;
 import io.vertx.servicediscovery.Record;
@@ -53,7 +54,7 @@ public class KTFunctionsResource {
         /* ----- the function exists in the backend but not in memory, so we need to compile it ----- */
         /* ----- compilation ----- */
         record -> KTEngine.compile(
-          record.getMetadata().getString("code"),
+          record.getMetadata().getString("code"), record.getMetadata().getJsonArray(" dependencies"),
           compilationError -> SingleJson.error(compilationError.getCause().getMessage()),
           /* ----- execution [again] ----- */
           compilationSuccess -> KTEngine.execute(functionName, parameters, newExecutionKO, newExecutionOK)
@@ -98,15 +99,24 @@ public class KTFunctionsResource {
       "kt"
     );
 
+    /* ----- if no dependencies ----- */
+    Option<JsonArray> optionalDependencies = Option.of(data.getJsonArray("dependencies"));
+    JsonArray dependencies = optionalDependencies.getOrElse(new JsonArray());
+
+    recordFunction.getMetadata().put("dependencies",  dependencies);
+
     String sourceCode = data.getString("code");
 
-    Function1<Record, Boolean> filterFunction = record -> record.getName().equals(data.getString("name")) && record.getMetadata().getString("kind").equals("kt");
+    Function1<Record, Boolean> filterFunction =
+      record ->
+        record.getName().equals(data.getString("name")) &&
+          record.getMetadata().getString("kind").equals("kt");
 
     /* ----- search the function ----- */
     return Data.searchFunction(vertx, filterFunction,
       /* ----- the function does not exist => create ----- */
       () -> KTEngine.compile( /* ----- compilation ----- */
-        sourceCode,
+        sourceCode, dependencies,
         compilationError -> SingleJson.error(compilationError.getMessage()),
         compilationSuccess -> Check.token(funkToken).isSuccess()
           ? Data.createFunction(vertx, recordFunction)
@@ -128,6 +138,10 @@ public class KTFunctionsResource {
     String description = data.getString("description");
     String functionName = data.getString("name");
 
+    /* ----- if no dependencies ----- */
+    Option<JsonArray> optionalDependencies = Option.of(data.getJsonArray("dependencies"));
+    JsonArray dependencies = optionalDependencies.getOrElse(new JsonArray());
+
     Function1<Record, Boolean> filterFunction = record -> record.getName().equals(functionName) && record.getMetadata().getString("kind").equals("kt");
 
     return Check.token(
@@ -139,10 +153,10 @@ public class KTFunctionsResource {
         /* ----- the function already exists ----- */
         recordFunction -> {
           /* ----- update record ----- */
-          Record record = Data.updateRecord(recordFunction, description, sourceCode);
+          Record record = Data.updateRecord(recordFunction, description, sourceCode, dependencies);
           /* ----- compilation ----- */
           return KTEngine.compile(
-            sourceCode,
+            sourceCode, dependencies,
             compilationError -> SingleJson.error(compilationError.getMessage()),
             compilationSuccess -> {
               /* ----- notify the other instances ----- */
@@ -150,7 +164,7 @@ public class KTFunctionsResource {
                 .put("what", "update")
                 .put("name", functionName)
                 .put("kind", "kt")
-                .put("code", sourceCode)
+                .put("code", sourceCode).put("dependencies", dependencies)
                 .put("sender", Data.instanceName());
 
               Data.redis(vertx).publish("changes", message.encode(),res -> {
