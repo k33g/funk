@@ -3,14 +3,12 @@ package garden.bots.engines;
 import garden.bots.resources.FunctionPayload;
 import io.vavr.Function1;
 import io.vavr.control.Try;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import rx.Single;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import java.util.Map;
 
 public class KTEngine {
 
@@ -24,7 +22,6 @@ public class KTEngine {
 
   public static Single<JsonObject> compile(FunctionPayload funktion, Function1<Throwable, Single<JsonObject>> failure, Function1<Object, Single<JsonObject>> success) {
     Try<Object> compilation = Try.of(() -> engine.eval(funktion.code));
-
     if(compilation.isFailure()) {
       return failure.apply(compilation.getCause());
     } else {

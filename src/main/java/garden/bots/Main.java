@@ -4,13 +4,13 @@ import garden.bots.data.Data;
 import garden.bots.engines.JSEngine;
 import garden.bots.engines.KTEngine;
 import garden.bots.resources.FunctionPayload;
-import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.rxjava.core.Vertx;
 import me.atrox.haikunator.Haikunator;
 import me.atrox.haikunator.HaikunatorBuilder;
 import net.redpipe.engine.core.Server;
-import io.vertx.core.json.JsonObject;
 
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -58,7 +58,7 @@ public class Main {
             break;
 
           default:
-            System.out.println(String.format("%s extension is not managed bt Funk", kind));
+            System.out.println(String.format("%s extension is not managed by Funk", kind));
         }
       }
 
@@ -92,6 +92,8 @@ public class Main {
 
     Haikunator haikunator = new HaikunatorBuilder().setTokenLength(6).build();
     Data.instanceName(haikunator.haikunate() + "-" + UUID.randomUUID());
+
+    //Data.getSyncRedisClient().append(Data.instanceName(), new Date().toString());
 
     new Server().start(config, Resources.getList())
       .subscribe(

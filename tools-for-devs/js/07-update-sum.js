@@ -8,19 +8,22 @@ const fetch = require('node-fetch');
 // create
 fetch("http://localhost:8080/funk/js", {
   body: JSON.stringify({
-    description:"this is the hello function",
-    name: "hello",
+    description:"this is the sum function",
+    name: "sum",
     code: `
-        function hello() {
-          return {result: "Hello 👋 World 🌍"};
-        }
+      var JsonObject = Java.type('io.vertx.core.json.JsonObject');
+
+      function sum(options) {
+        print(options)
+        return {result: options.a + options.b};
+      }
     `.split("\n").map(item => item.trim()).join("\n")
   }),
   headers: {
     'funk-token': 'panda',
     'content-type': 'application/json'
   },
-  method: 'POST'
+  method: 'PUT'
 })
 .then(response => response.json())
 .then(data => console.log(data))

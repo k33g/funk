@@ -7,8 +7,6 @@ import garden.bots.singles.SingleJson;
 import garden.bots.token.Check;
 import io.vavr.Function0;
 import io.vavr.Function1;
-import io.vavr.control.Option;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rxjava.core.Vertx;
 import io.vertx.servicediscovery.Record;
@@ -16,7 +14,6 @@ import rx.Single;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import java.util.Map;
 
 
 @Path("/funk/kt")
@@ -27,6 +24,9 @@ public class KTFunctionsResource {
   @Path("/run")
   @POST
   public Single<JsonObject> run(@Context Vertx vertx, @HeaderParam("funk-token") String funkToken, JsonObject data) {
+
+    //Funk.vertx(vertx);
+
     data.put("kind", "kt");
     FunctionPayload funktion = FunctionPayload.of(data);
 

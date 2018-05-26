@@ -7,11 +7,13 @@ fetch("http://localhost:8080/funk/kt", {
   body: JSON.stringify({
     description:"this is the sum function",
     name: "sum",
-    code: `
+    code: `// this is a Kotlin function
       import io.vertx.core.json.JsonObject
       
-      fun hello(): JsonObject {
-        return JsonObject().put("result", "hello world")
+      fun sum(options: JsonObject): JsonObject {
+        
+        val res = options.getInteger("a") as Int + options.getInteger("b") as Int
+        return JsonObject().put("result", res)
       }
     `.split("\n").map(item => item.trim()).join("\n")
   }),
@@ -24,5 +26,4 @@ fetch("http://localhost:8080/funk/kt", {
 .then(response => response.json())
 .then(data => console.log(data))
 .catch(err => console.log(err));
-
 

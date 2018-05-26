@@ -3,7 +3,6 @@ package garden.bots.engines;
 import garden.bots.resources.FunctionPayload;
 import io.vavr.Function1;
 import io.vavr.control.Try;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
@@ -11,7 +10,6 @@ import rx.Single;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
-import java.util.Map;
 
 public class JSEngine {
   //private static ScriptEngine engine = new NashornScriptEngineFactory().getScriptEngine("--language=es6");
@@ -32,6 +30,7 @@ public class JSEngine {
       return success.apply(compilation.get());
     }
   }
+
 
   public static Try<ScriptObjectMirror> execute(FunctionPayload funktion) {
     return Try.of(() -> (ScriptObjectMirror) inv.invokeFunction(funktion.name, funktion.parameters));
@@ -67,4 +66,5 @@ public class JSEngine {
       return success.apply(execution.get());
     }
   }
+
 }

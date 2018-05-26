@@ -2,12 +2,11 @@ package garden.bots.resources;
 
 
 import garden.bots.data.Data;
+import garden.bots.engines.JSEngine;
 import garden.bots.singles.SingleJson;
 import garden.bots.token.Check;
 import io.vavr.Function0;
 import io.vavr.Function1;
-import io.vavr.control.Option;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rxjava.core.Vertx;
 import io.vertx.servicediscovery.Record;
@@ -17,10 +16,6 @@ import rx.Single;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 
-import garden.bots.engines.JSEngine;
-
-import java.util.Map;
-
 
 @Path("/funk/js")
 public class JSFunctionsResource {
@@ -29,6 +24,9 @@ public class JSFunctionsResource {
   @Path("/run")
   @POST
   public Single<JsonObject> run(@Context Vertx vertx, @HeaderParam("funk-token") String funkToken, JsonObject data) {
+
+    //Funk.vertx(vertx);
+
     data.put("kind", "js");
     FunctionPayload funktion = FunctionPayload.of(data);
 
