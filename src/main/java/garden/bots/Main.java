@@ -67,9 +67,22 @@ public class Main {
 
     vertx.eventBus().<JsonObject>consumer("io.vertx.redis.logs", received -> {
       JsonObject value = received.body().getJsonObject("value");
-      System.out.println("==========================================================================================");
       System.out.println(value);
-      System.out.println("==========================================================================================");
+    });
+
+    vertx.eventBus().<JsonObject>consumer("io.vertx.redis.monitor", received -> {
+      JsonObject value = received.body().getJsonObject("value");
+      System.out.println(value);
+
+    });
+
+    Data.redis(vertx).subscribe("monitor", res -> {
+      if (res.succeeded()) {
+        // TODO: use some colors
+        System.out.println("==========================================================================================");
+        System.out.println(" Registration to #monitor channel is ok");
+        System.out.println("==========================================================================================");
+      }
     });
 
     Data.redis(vertx).subscribe("logs", res -> {

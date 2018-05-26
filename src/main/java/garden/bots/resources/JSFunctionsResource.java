@@ -2,6 +2,7 @@ package garden.bots.resources;
 
 
 import garden.bots.data.Data;
+import garden.bots.engines.EngineLogger;
 import garden.bots.engines.JSEngine;
 import garden.bots.singles.SingleJson;
 import garden.bots.token.Check;
@@ -9,6 +10,7 @@ import io.vavr.Function0;
 import io.vavr.Function1;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rxjava.core.Vertx;
+import io.vertx.rxjava.core.http.HttpServerRequest;
 import io.vertx.servicediscovery.Record;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import rx.Single;
@@ -23,9 +25,9 @@ public class JSFunctionsResource {
   @Produces("application/json; charset=utf-8")
   @Path("/run")
   @POST
-  public Single<JsonObject> run(@Context Vertx vertx, @HeaderParam("funk-token") String funkToken, JsonObject data) {
+  public Single<JsonObject> run(@Context HttpServerRequest req, @Context Vertx vertx, @HeaderParam("funk-token") String funkToken, JsonObject data) {
 
-    //Funk.vertx(vertx);
+    EngineLogger.vertx(vertx);
 
     data.put("kind", "js");
     FunctionPayload funktion = FunctionPayload.of(data);
@@ -87,6 +89,9 @@ public class JSFunctionsResource {
   //@Path("/create")
   @POST
   public Single<JsonObject> create(@Context Vertx vertx, @HeaderParam("funk-token") String funkToken, JsonObject data) {
+
+    EngineLogger.vertx(vertx);
+
     data.put("kind", "js");
     FunctionPayload funktion = FunctionPayload.of(data);
     Record recordFunction = funktion.getRecord();
@@ -122,6 +127,9 @@ public class JSFunctionsResource {
   //@Path("/update")
   @PUT
   public Single<JsonObject> update(@Context Vertx vertx, @HeaderParam("funk-token") String funkToken, JsonObject data) {
+
+    EngineLogger.vertx(vertx);
+
     data.put("kind", "js");
     FunctionPayload funktion = FunctionPayload.of(data);
 
