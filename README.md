@@ -167,7 +167,7 @@ curl --header "funk-token: panda" -H "Content-Type: application/json" -X POST ht
   "description":"sum function",
   "name":"sum",
   "code":"import io.vertx.core.json.JsonObject\n
-    fun sum(options: Map<String, Int>): JsonObject {\n
+    fun sum(options: JsonObject): JsonObject {\n
       val res = options.get(\"a\") as Int + options.get(\"b\") as Int\n
       return JsonObject().put(\"result\", res)\n
     }
@@ -210,7 +210,7 @@ curl --header "funk-token: panda" -H "Content-Type: application/json" -X PUT htt
   "description":"sum function",
   "name":"sum",
   "code":"import io.vertx.core.json.JsonObject\n
-    fun sum(options: Map<String, Int>): JsonObject {\n
+    fun sum(options: JsonObject): JsonObject {\n
       val res = options.get(\"a\") as Int + options.get(\"b\") as Int\n
       return JsonObject().put(\"result\", res)\n
     }
@@ -223,6 +223,43 @@ EOF
 
 ```shell
 curl --header "funk-token: panda" -H "Content-Type: application/json" -X GET http://localhost:8080/funk/kt
+```
+
+## Function call Functions
+
+> Calling JavaScript and Kotlin functions from JavaScript
+
+```
+var Funk = Java.type('funk.Funk');
+var JsonObject = Java.type('io.vertx.core.json.JsonObject');
+
+
+var sumParameters = new JsonObject()
+sumParameters.put("a", 40)
+sumParameters.put("b", 2)
+var sumJS = Funk.js("sum").call(sumParameters)
+    
+print("SUM JS: " + sumJS) // SUM JS: {"result":42.0}
+    
+var sumKT = Funk.kt("sum").call(sumParameters)
+    
+print("SUM KT: " + sumKT)  // SUM KT: {"result":42.0}
+```
+
+> Calling JavaScript and Kotlin functions from Kotlin
+
+```
+import io.vertx.core.json.JsonObject
+import funk.Funk
+    
+
+val sumParameters = JsonObject()
+sumParameters.put("a", 40)
+sumParameters.put("b", 2)
+
+val sumJS = Funk.js("sum").call(sumParameters)
+val sumKT = Funk.kt("sum").call(sumParameters)
+
 ```
 
 

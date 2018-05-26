@@ -5,10 +5,9 @@ import io.vavr.Function0;
 import io.vavr.Function1;
 import io.vavr.control.Option;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.redis.RedisOptions;
 import io.vertx.rxjava.core.Vertx;
-
-import io.vertx.core.json.JsonObject;
 import io.vertx.rxjava.redis.RedisClient;
 import io.vertx.rxjava.servicediscovery.ServiceDiscovery;
 import io.vertx.rxjava.servicediscovery.types.HttpEndpoint;
@@ -16,6 +15,7 @@ import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 import me.atrox.haikunator.Haikunator;
 import me.atrox.haikunator.HaikunatorBuilder;
+import redis.clients.jedis.Jedis;
 import rx.Single;
 
 import java.util.Optional;
@@ -33,6 +33,43 @@ public class Data {
   private static String serviceHost = Optional.ofNullable(System.getenv("SERVICE_HOST")).orElse("localhost"); // domain name
   private static Integer servicePort = Integer.parseInt(Optional.ofNullable(System.getenv("SERVICE_PORT")).orElse("8080")); // set to 80 on Clever Cloud
   private static String serviceRoot = Optional.ofNullable(System.getenv("SERVICE_ROOT")).orElse("/funk");
+
+  // synchronous part
+
+  /*
+  REDIS_HOST	bpvks2nlm-redis.services.clever-cloud.com
+REDIS_PASSWORD	2rVv7zbWO3Vt4iUAeZn
+REDIS_PORT	3082
+REDIS_URL	redis://:2rVv7zbWO3Vt4iUAeZn@bpvks2nlm-redis.services.clever-cloud.com:3082
+   */
+
+  public static Jedis getSyncRedisClient() {
+    if(redisAuth == null) {
+      return new Jedis("redis://"+redisHost+":"+redisPort);
+    } else  {
+      return new Jedis("redis://:"+redisAuth+"@"+redisHost+":"+redisPort);
+    }
+  }
+
+
+  public static Option<JsonObject> syncSearchFunctiont(String name, String kind) {
+
+    Option<JsonObject> optionalFunktion = Option.ofOptional(Data.getSyncRedisClient()
+      .hgetAll("records")
+      .entrySet()
+      .stream()
+      .map(record -> new JsonObject(record.getValue()))
+      .filter(entries -> {
+        return entries.getString("name").equals(name)
+          && entries.getJsonObject("metadata").getString("kind").equals(kind);
+      }).findFirst());
+
+    return optionalFunktion;
+  }
+
+
+
+  // end of synchronous part
 
   private static RedisClient redis = null;
 
@@ -107,6 +144,7 @@ public class Data {
     });
 
   }
+
   public static Single<JsonObject> functionsList(Vertx vertx, Function1<Record, Boolean> filterAllFunctions) {
     return Data.discovery(vertx).rxGetRecords(filterAllFunctions).map(records -> new JsonObject().put("functions",new JsonArray(records)));
   }

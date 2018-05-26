@@ -78,6 +78,15 @@ public class FunctionPayload {
       .put("kind", kind)
     );
   }
+
+  public static FunctionPayload from(String name, String code, String kind, JsonObject parameters) {
+    return new FunctionPayload(new JsonObject()
+      .put("name", name)
+      .put("code", code)
+      .put("kind", kind)
+      .put("parameters", parameters)
+    );
+  }
 }
 
 

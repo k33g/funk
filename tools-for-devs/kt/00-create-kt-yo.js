@@ -2,17 +2,19 @@
 
 const fetch = require('node-fetch');
 
+// script.split("\n").map(item => item.trim()).join("\n")
+
+
 // create
 fetch("http://localhost:8080/funk/kt", {
   body: JSON.stringify({
-    description:"this is the sum function",
-    name: "sum",
+    description:"this is the yo function",
+    name: "yo",
     code: `
       import io.vertx.core.json.JsonObject
       
-      fun sum(options: Map<String, Int>): JsonObject {
-        val res = options.get("a") as Int + options.get("b") as Int
-        return JsonObject().put("result", res)
+      fun yo(): JsonObject {
+        return JsonObject().put("result", "yo")
       }
     `.split("\n").map(item => item.trim()).join("\n")
   }),

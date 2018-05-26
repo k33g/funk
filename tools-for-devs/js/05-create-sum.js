@@ -2,17 +2,20 @@
 
 const fetch = require('node-fetch');
 
+// script.split("\n").map(item => item.trim()).join("\n")
+
+
 // create
-fetch("http://localhost:8080/funk/kt", {
+fetch("http://localhost:8080/funk/js", {
   body: JSON.stringify({
     description:"this is the sum function",
     name: "sum",
-    code: `// this is a Kotlin function
-      import io.vertx.core.json.JsonObject
-      
-      fun sum(options: Map<String, Int>): JsonObject {
-        val res = options.get("a") as Int + options.get("b") as Int
-        return JsonObject().put("result", res)
+    code: `
+      var JsonObject = Java.type('io.vertx.core.json.JsonObject');
+
+      function sum(options) {
+        print(options)
+        return {result: options.a + options.b};
       }
     `.split("\n").map(item => item.trim()).join("\n")
   }),
@@ -20,7 +23,7 @@ fetch("http://localhost:8080/funk/kt", {
     'funk-token': 'panda',
     'content-type': 'application/json'
   },
-  method: 'PUT'
+  method: 'POST'
 })
 .then(response => response.json())
 .then(data => console.log(data))
