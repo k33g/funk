@@ -3,6 +3,7 @@ package garden.bots;
 import garden.bots.data.Data;
 import garden.bots.engines.JSEngine;
 import garden.bots.engines.KTEngine;
+import garden.bots.resources.FunctionPayload;
 import io.vertx.core.json.JsonArray;
 import io.vertx.rxjava.core.Vertx;
 import me.atrox.haikunator.Haikunator;
@@ -34,7 +35,7 @@ public class Main {
       String name = message.getString("name");
       String code = message.getString("code");
 
-      JsonArray dependencies = message.getJsonArray("dependencies"); //TODO: check null
+      //JsonArray dependencies = message.getJsonArray("dependencies");
 
       System.out.println("sender: " + sender);
       System.out.println("what: " + what);
@@ -49,11 +50,11 @@ public class Main {
         //TODO manage compilation errors
         switch (kind) {
           case "js":
-            JSEngine.compile(code, dependencies);
+            JSEngine.compile(FunctionPayload.from(name, code));
             break;
 
           case "kt":
-            KTEngine.compile(code, dependencies);
+            KTEngine.compile(FunctionPayload.from(name, code));
             break;
 
           default:

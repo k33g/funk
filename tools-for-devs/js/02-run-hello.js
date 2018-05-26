@@ -5,7 +5,7 @@ const fetch = require('node-fetch');
 // run
 fetch("http://localhost:8080/funk/js/run", {
   body: JSON.stringify({
-    name: "hello" //parameters:null
+    name: "hello"
   }),
   headers: {
     'funk-token': 'panda',
