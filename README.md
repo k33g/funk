@@ -229,7 +229,7 @@ curl --header "funk-token: panda" -H "Content-Type: application/json" -X GET htt
 
 > Calling JavaScript and Kotlin functions from JavaScript
 
-```
+```javascript
 var Funk = Java.type('funk.Funk');
 var JsonObject = Java.type('io.vertx.core.json.JsonObject');
 
@@ -248,7 +248,7 @@ print("SUM KT: " + sumKT)  // SUM KT: {"result":42.0}
 
 > Calling JavaScript and Kotlin functions from Kotlin
 
-```
+```kotlin
 import io.vertx.core.json.JsonObject
 import funk.Funk
     
