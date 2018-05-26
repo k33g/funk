@@ -27,14 +27,11 @@ public class KTFunctionsResource {
   @Path("/run")
   @POST
   public Single<JsonObject> run(@Context Vertx vertx, @HeaderParam("funk-token") String funkToken, JsonObject data) {
-    //TODO: manage errors
-    String functionName = data.getString("name");
+    data.put("kind", "kt");
+    FunctionPayload funktion = FunctionPayload.of(data);
 
-    /* ----- if no parameters ----- */
-    Option<JsonObject> optionalParameters = Option.of(data.getJsonObject("parameters"));
-    Map parameters = optionalParameters.getOrElse(new JsonObject()).getMap();
-
-    Function1<Record, Boolean> filterFunction = record -> record.getName().equals(data.getString("name")) && record.getMetadata().getString("kind").equals("kt");
+    Function1<Record, Boolean> filterFunction = record ->
+      record.getName().equals(funktion.name) && record.getMetadata().getString("kind").equals(funktion.kind);
 
     Function1<Throwable, Single<JsonObject>> newExecutionKO = (error) -> SingleJson.error(error.getCause().getMessage());
 
@@ -43,7 +40,7 @@ public class KTFunctionsResource {
     Function1<Throwable, Single<JsonObject>> executionKO = (error) -> {
       /* ----- function does not exist in memory ----- */
       System.out.println("==============================================");
-      System.out.println(" Execution error of " + functionName + "(kt)");
+      System.out.println(" Execution error of " + funktion.name + "(kt)");
       System.out.println(" Trying to evaluate again the function...");
       System.out.println("==============================================");
 
@@ -54,10 +51,10 @@ public class KTFunctionsResource {
         /* ----- the function exists in the backend but not in memory, so we need to compile it ----- */
         /* ----- compilation ----- */
         record -> KTEngine.compile(
-          record.getMetadata().getString("code"), record.getMetadata().getJsonArray(" dependencies"),
+          FunctionPayload.from(record),
           compilationError -> SingleJson.error(compilationError.getCause().getMessage()),
           /* ----- execution [again] ----- */
-          compilationSuccess -> KTEngine.execute(functionName, parameters, newExecutionKO, newExecutionOK)
+          compilationSuccess -> KTEngine.execute(funktion, newExecutionKO, newExecutionOK)
         )
       );
 
@@ -67,7 +64,7 @@ public class KTFunctionsResource {
 
     Function0<Single<JsonObject>> tokenKO = () -> SingleJson.error("Bad token");
 
-    Function0<Single<JsonObject>> tokenOK = () -> KTEngine.execute(functionName, parameters, executionKO, executionOK);
+    Function0<Single<JsonObject>> tokenOK = () -> KTEngine.execute(funktion, executionKO, executionOK);
 
     return Check.token(funkToken, tokenKO, tokenOK);
 
@@ -91,32 +88,26 @@ public class KTFunctionsResource {
   //@Path("/create")
   @POST
   public Single<JsonObject> create(@Context Vertx vertx, @HeaderParam("funk-token") String funkToken, JsonObject data) {
-
-    Record recordFunction = Data.createFunctionRecord(
-      data.getString("name"),
-      data.getString("description"),
-      data.getString("code"),
-      "kt"
-    );
-
-    /* ----- if no dependencies ----- */
-    Option<JsonArray> optionalDependencies = Option.of(data.getJsonArray("dependencies"));
-    JsonArray dependencies = optionalDependencies.getOrElse(new JsonArray());
-
-    recordFunction.getMetadata().put("dependencies",  dependencies);
-
-    String sourceCode = data.getString("code");
+    data.put("kind", "kt");
+    FunctionPayload funktion = FunctionPayload.of(data);
+    Record recordFunction = funktion.getRecord();
 
     Function1<Record, Boolean> filterFunction =
       record ->
-        record.getName().equals(data.getString("name")) &&
-          record.getMetadata().getString("kind").equals("kt");
+        record.getName().equals(funktion.name) &&
+          record.getMetadata().getString("kind").equals(funktion.kind);
+
+
+
+    System.out.println("==============================================");
+    System.out.println(" Create " + funktion.name + "("+funktion.kind+")");
+    System.out.println("==============================================");
 
     /* ----- search the function ----- */
     return Data.searchFunction(vertx, filterFunction,
       /* ----- the function does not exist => create ----- */
       () -> KTEngine.compile( /* ----- compilation ----- */
-        sourceCode, dependencies,
+        funktion,
         compilationError -> SingleJson.error(compilationError.getMessage()),
         compilationSuccess -> Check.token(funkToken).isSuccess()
           ? Data.createFunction(vertx, recordFunction)
@@ -134,15 +125,17 @@ public class KTFunctionsResource {
   @PUT
   public Single<JsonObject> update(@Context Vertx vertx, @HeaderParam("funk-token") String funkToken, JsonObject data) {
 
-    String sourceCode = data.getString("code");
-    String description = data.getString("description");
-    String functionName = data.getString("name");
+    data.put("kind", "kt");
+    FunctionPayload funktion = FunctionPayload.of(data);
 
-    /* ----- if no dependencies ----- */
-    Option<JsonArray> optionalDependencies = Option.of(data.getJsonArray("dependencies"));
-    JsonArray dependencies = optionalDependencies.getOrElse(new JsonArray());
+    Function1<Record, Boolean> filterFunction =
+      record ->
+        record.getName().equals(funktion.name) &&
+          record.getMetadata().getString("kind").equals(funktion.kind);
 
-    Function1<Record, Boolean> filterFunction = record -> record.getName().equals(functionName) && record.getMetadata().getString("kind").equals("kt");
+    System.out.println("==============================================");
+    System.out.println(" Update " + funktion.name + "("+funktion.kind+")");
+    System.out.println("==============================================");
 
     return Check.token(
       funkToken,
@@ -153,18 +146,19 @@ public class KTFunctionsResource {
         /* ----- the function already exists ----- */
         recordFunction -> {
           /* ----- update record ----- */
-          Record record = Data.updateRecord(recordFunction, description, sourceCode, dependencies);
+          Record record = Data.updateRecord(recordFunction, funktion);
           /* ----- compilation ----- */
           return KTEngine.compile(
-            sourceCode, dependencies,
+            funktion,
             compilationError -> SingleJson.error(compilationError.getMessage()),
             compilationSuccess -> {
               /* ----- notify the other instances ----- */
               JsonObject message = new JsonObject()
                 .put("what", "update")
-                .put("name", functionName)
+                .put("name", funktion.name)
                 .put("kind", "kt")
-                .put("code", sourceCode).put("dependencies", dependencies)
+                .put("code", funktion.code)
+                .put("dependencies", funktion.dependencies)
                 .put("sender", Data.instanceName());
 
               Data.redis(vertx).publish("changes", message.encode(),res -> {

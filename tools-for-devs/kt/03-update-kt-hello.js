@@ -3,7 +3,6 @@
 const fetch = require('node-fetch');
 
 // create
-// create
 fetch("http://localhost:8080/funk/kt", {
   body: JSON.stringify({
     description:"this is the sum function",

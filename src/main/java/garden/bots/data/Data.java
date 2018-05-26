@@ -1,5 +1,6 @@
 package garden.bots.data;
 
+import garden.bots.resources.FunctionPayload;
 import io.vavr.Function0;
 import io.vavr.Function1;
 import io.vavr.control.Option;
@@ -79,7 +80,7 @@ public class Data {
   }
 
 
-  public static Record createFunctionRecord(String functionName, String description, String code, String kind) {
+  public static Record createFunctionRecord(String functionName, String description, String code, String kind, JsonArray dependencies) {
     // create the microservice/function record
     Record record = HttpEndpoint.createRecord(
       functionName,
@@ -93,6 +94,7 @@ public class Data {
       .put("code", code)
       .put("description", description)
       .put("kind", kind)
+      .put("dependencies",  dependencies)
     );
 
     return record;
@@ -100,6 +102,7 @@ public class Data {
 
   public static Single<JsonObject> searchFunction(Vertx vertx, Function1<Record, Boolean> filterFunction, Function0<Single<JsonObject>> none, Function1<Record, Single<JsonObject>> some) {
     return Data.discovery(vertx).rxGetRecord(filterFunction).map(record -> Option.of(record)).flatMap(record -> {
+
       return record.isEmpty() ? none.apply() : some.apply(record.get());
     });
 
@@ -118,9 +121,11 @@ public class Data {
     return Data.discovery(vertx).rxPublish(recordFunction).map(publishedRecord -> publishedRecord.toJson());
   }
 
-  public static Record updateRecord(Record record, String description, String code, JsonArray dependencies) {
-    record.getMetadata().put("description", description).put("code", code);
-    record.getMetadata().put("dependencies",  dependencies);
+  public static Record updateRecord(Record record, FunctionPayload funktion) {
+    record.getMetadata()
+      .put("description", funktion.description)
+      .put("code", funktion.code)
+      .put("dependencies",  funktion.dependencies);
     return record;
   }
 }

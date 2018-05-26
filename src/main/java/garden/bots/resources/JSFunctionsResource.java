@@ -29,18 +29,11 @@ public class JSFunctionsResource {
   @Path("/run")
   @POST
   public Single<JsonObject> run(@Context Vertx vertx, @HeaderParam("funk-token") String funkToken, JsonObject data) {
+    data.put("kind", "js");
+    FunctionPayload funktion = FunctionPayload.of(data);
 
-    //TODO: manage errors
-    String functionName = data.getString("name");
-
-    /* ----- if no parameters ----- */
-    Option<JsonObject> optionalParameters = Option.of(data.getJsonObject("parameters"));
-    Map parameters = optionalParameters.getOrElse(new JsonObject()).getMap();
-
-    //String functionName = data.getString("name");
-    //Map parameters = data.getJsonObject("parameters").getMap();
-
-    Function1<Record, Boolean> filterFunction = record -> record.getName().equals(data.getString("name")) && record.getMetadata().getString("kind").equals("js");
+    Function1<Record, Boolean> filterFunction = record ->
+      record.getName().equals(funktion.name) && record.getMetadata().getString("kind").equals(funktion.kind);
 
     Function1<Throwable, Single<JsonObject>> newExecutionKO = (error) -> SingleJson.error(error.getCause().getMessage());
 
@@ -49,7 +42,7 @@ public class JSFunctionsResource {
     Function1<Throwable, Single<JsonObject>> executionKO = (error) -> {
       /* ----- function does not exist in memory ----- */
       System.out.println("==============================================");
-      System.out.println(" Execution error of " + functionName + "(js)");
+      System.out.println(" Execution error of " + funktion.name + "(js)");
       System.out.println(" Trying to evaluate again the function...");
       System.out.println("==============================================");
 
@@ -60,10 +53,10 @@ public class JSFunctionsResource {
         /* ----- the function exists in the backen but not in memory, so we need to compile it ----- */
         /* ----- compilation ----- */
         record -> JSEngine.compile(
-          record.getMetadata().getString("code"), record.getMetadata().getJsonArray(" dependencies"),
+          FunctionPayload.from(record),
           compilationError -> SingleJson.error(compilationError.getCause().getMessage()),
           /* ----- execution [again] ----- */
-          compilationSuccess -> JSEngine.execute(functionName, parameters, newExecutionKO, newExecutionOK)
+          compilationSuccess -> JSEngine.execute(funktion, newExecutionKO, newExecutionOK)
         )
       );
     };
@@ -72,7 +65,7 @@ public class JSFunctionsResource {
 
     Function0<Single<JsonObject>> tokenKO = () -> SingleJson.error("Bad token");
 
-    Function0<Single<JsonObject>> tokenOK = () -> JSEngine.execute(functionName, parameters, executionKO, executionOK);
+    Function0<Single<JsonObject>> tokenOK = () -> JSEngine.execute(funktion, executionKO, executionOK);
 
     return Check.token(funkToken, tokenKO, tokenOK);
 
@@ -96,30 +89,25 @@ public class JSFunctionsResource {
   //@Path("/create")
   @POST
   public Single<JsonObject> create(@Context Vertx vertx, @HeaderParam("funk-token") String funkToken, JsonObject data) {
+    data.put("kind", "js");
+    FunctionPayload funktion = FunctionPayload.of(data);
+    Record recordFunction = funktion.getRecord();
 
-    Record recordFunction = Data.createFunctionRecord(
-      data.getString("name"),
-      data.getString("description"),
-      data.getString("code"),
-      "js"
-    );
-
-    /* ----- if no dependencies ----- */
-    Option<JsonArray> optionalDependencies = Option.of(data.getJsonArray("dependencies"));
-    JsonArray dependencies = optionalDependencies.getOrElse(new JsonArray());
-
-    recordFunction.getMetadata().put("dependencies",  dependencies);
+    Function1<Record, Boolean> filterFunction =
+      record ->
+        record.getName().equals(funktion.name) &&
+          record.getMetadata().getString("kind").equals(funktion.kind);
 
 
-    String sourceCode = data.getString("code");
-
-    Function1<Record, Boolean> filterFunction = record -> record.getName().equals(data.getString("name")) && record.getMetadata().getString("kind").equals("js");
+    System.out.println("==============================================");
+    System.out.println(" Create " + funktion.name + "("+funktion.kind+")");
+    System.out.println("==============================================");
 
     /* ----- search the function ----- */
     return Data.searchFunction(vertx, filterFunction,
       /* ----- the function does not exist => create ----- */
       () -> JSEngine.compile( /* ----- compilation ----- */
-        sourceCode, dependencies,
+        funktion,
         compilationError -> SingleJson.error(compilationError.getMessage()),
         compilationSuccess -> Check.token(funkToken).isSuccess()
           ? Data.createFunction(vertx, recordFunction)
@@ -136,16 +124,17 @@ public class JSFunctionsResource {
   //@Path("/update")
   @PUT
   public Single<JsonObject> update(@Context Vertx vertx, @HeaderParam("funk-token") String funkToken, JsonObject data) {
+    data.put("kind", "js");
+    FunctionPayload funktion = FunctionPayload.of(data);
 
-    String sourceCode = data.getString("code");
-    String description = data.getString("description");
-    String functionName = data.getString("name");
+    Function1<Record, Boolean> filterFunction =
+      record ->
+        record.getName().equals(funktion.name) &&
+          record.getMetadata().getString("kind").equals(funktion.kind);
 
-    /* ----- if no dependencies ----- */
-    Option<JsonArray> optionalDependencies = Option.of(data.getJsonArray("dependencies"));
-    JsonArray dependencies = optionalDependencies.getOrElse(new JsonArray());
-
-    Function1<Record, Boolean> filterFunction = record -> record.getName().equals(functionName) && record.getMetadata().getString("kind").equals("js");
+    System.out.println("==============================================");
+    System.out.println(" Update " + funktion.name + "("+funktion.kind+")");
+    System.out.println("==============================================");
 
     return Check.token(
       funkToken,
@@ -156,18 +145,19 @@ public class JSFunctionsResource {
         /* ----- the function already exists ----- */
         recordFunction -> {
           /* ----- update record ----- */
-          Record record = Data.updateRecord(recordFunction, description, sourceCode, dependencies);
+          Record record = Data.updateRecord(recordFunction, funktion);
           /* ----- compilation ----- */
           return JSEngine.compile(
-            sourceCode, dependencies,
+            funktion,
             compilationError -> SingleJson.error(compilationError.getMessage()),
             compilationSuccess -> {
               /* ----- notify the other instances ----- */
               JsonObject message = new JsonObject()
                 .put("what", "update")
-                .put("name", functionName)
-                .put("kind", "js")
-                .put("code", sourceCode).put("dependencies", dependencies)
+                .put("name", funktion.name)
+                .put("kind", funktion.kind)
+                .put("code", funktion.code)
+                .put("dependencies", funktion.dependencies)
                 .put("sender", Data.instanceName());
 
               Data.redis(vertx).publish("changes", message.encode(),res -> {

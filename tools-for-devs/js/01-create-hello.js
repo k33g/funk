@@ -10,11 +10,8 @@ fetch("http://localhost:8080/funk/js", {
   body: JSON.stringify({
     description:"this is the hello function",
     name: "hello",
-    dependencies:["hi","yo"],
     code: `
         function hello() {
-          hi();
-          yo();
           return {result: "Hello 👋 World 🌍"};
         }
     `.split("\n").map(item => item.trim()).join("\n")

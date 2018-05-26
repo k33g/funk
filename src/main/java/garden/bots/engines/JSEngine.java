@@ -1,5 +1,6 @@
 package garden.bots.engines;
 
+import garden.bots.resources.FunctionPayload;
 import io.vavr.Function1;
 import io.vavr.control.Try;
 import io.vertx.core.json.JsonArray;
@@ -18,12 +19,12 @@ public class JSEngine {
 
   private static Invocable inv = (Invocable) engine;
 
-  public static Try<Object> compile(String sourceCode, JsonArray dependencies) {
-      return Try.of(() -> engine.eval(sourceCode));
+  public static Try<Object> compile(FunctionPayload funktion) {
+      return Try.of(() -> engine.eval(funktion.code));
   };
 
-  public static Single<JsonObject> compile(String sourceCode, JsonArray dependencies, Function1<Throwable, Single<JsonObject>> failure, Function1<Object, Single<JsonObject>> success) {
-    Try<Object> compilation = Try.of(() -> engine.eval(sourceCode));
+  public static Single<JsonObject> compile(FunctionPayload funktion, Function1<Throwable, Single<JsonObject>> failure, Function1<Object, Single<JsonObject>> success) {
+    Try<Object> compilation = Try.of(() -> engine.eval(funktion.code));
 
     if(compilation.isFailure()) {
       return failure.apply(compilation.getCause());
@@ -32,29 +33,29 @@ public class JSEngine {
     }
   }
 
-  public static Try<ScriptObjectMirror> execute(String functionName, Map<String, Object> parameters) {
-    return Try.of(() -> (ScriptObjectMirror) inv.invokeFunction(functionName, parameters));
+  public static Try<ScriptObjectMirror> execute(FunctionPayload funktion) {
+    return Try.of(() -> (ScriptObjectMirror) inv.invokeFunction(funktion.name, funktion.parameters));
   }
 
-  public static Single<JsonObject> execute(String functionName, Map<String, Object> parameters, Function1<Throwable, Single<JsonObject>> failure, Function1<ScriptObjectMirror, Single<JsonObject>> success) {
+  public static Single<JsonObject> execute(FunctionPayload funktion, Function1<Throwable, Single<JsonObject>> failure, Function1<ScriptObjectMirror, Single<JsonObject>> success) {
 
     Try<ScriptObjectMirror> execution;
 
-    if(parameters.size() == 0) {
+    if(funktion.parameters.size() == 0) {
       System.out.println("=========== Execution without parameter ===========");
-      System.out.println(" - parameters: " + parameters);
-      System.out.println(" - size: " + parameters.size());
+      System.out.println(" - parameters: " + funktion.parameters);
+      System.out.println(" - size: " + funktion.parameters.size());
       System.out.println("===================================================");
 
-      execution = Try.of(() -> (ScriptObjectMirror) inv.invokeFunction(functionName));
+      execution = Try.of(() -> (ScriptObjectMirror) inv.invokeFunction(funktion.name)); // use version
 
     } else {
       System.out.println("=========== Execution with parameters =============");
-      System.out.println(" - parameters: " + parameters);
-      System.out.println(" - size: " + parameters.size());
+      System.out.println(" - parameters: " + funktion.parameters);
+      System.out.println(" - size: " + funktion.parameters.size());
       System.out.println("===================================================");
 
-      execution = Try.of(() -> (ScriptObjectMirror) inv.invokeFunction(functionName, parameters));
+      execution = Try.of(() -> (ScriptObjectMirror) inv.invokeFunction(funktion.name, funktion.parameters));
     }
 
     if(execution.isFailure()) {
