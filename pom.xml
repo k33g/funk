@@ -96,35 +96,6 @@
             <version>${kotlin.version}</version>
         </dependency>
 
-        <!-- Scala -->
-
-        <dependency>
-            <groupId>com.googlecode.scalascriptengine</groupId>
-            <artifactId>scalascriptengine_2.12</artifactId>
-            <version>1.3.11</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-reflect</artifactId>
-            <version>${scala.version}</version>
-        </dependency>
-
-        <!--
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-            <version>${scala.version}</version>
-        </dependency>
-        -->
-
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-compiler</artifactId>
-            <version>${scala.version}</version>
-        </dependency>
-
         <!-- Haikunator -->
         <dependency>
             <groupId>me.atrox.haikunator</groupId>
