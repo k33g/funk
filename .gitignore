@@ -6,3 +6,4 @@ target/*
 sandbox/*
 tools-for-devs/node_modules/*
 *.rdb
+**/.DS_Store
