@@ -86,6 +86,9 @@ Each function, for a language, has a unique identifier: **its name**, so
 - if you need several version use something like that: `hello_v_101`
  
 
+:warning: :wave: **Now you can use the Funk CLI: `funkli`**: https://github.com/k33g/funkli
+
+
 ### JavaScript functions
 
 #### Create a JavaScript function
