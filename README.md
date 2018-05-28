@@ -28,19 +28,25 @@
 ## Run it
 
 > Simple way (locally):
+> :wave: Funk uses a Java SecurityManager to avoid some "malicious" fun**K**tion 
 
 ```shell
 # you need to start `redis-server` before
 # you need to define a token
 
-FUNK_TOKEN="panda" mvn install exec:java
+FUNK_TOKEN="panda" \
+MAVEN_OPTS="-Djava.security.manager -Djava.security.policy=./funk.policy" \
+mvn install exec:java
 ```
 
 
 > Start with an other http port:
 
 ```shell
-FUNK_TOKEN="panda" PORT=8080 mvn install exec:java
+FUNK_TOKEN="panda" \
+PORT=8080 \
+MAVEN_OPTS="-Djava.security.manager -Djava.security.policy=./funk.policy" \
+mvn install exec:java
 ```
 
 > Change the Redis information:
@@ -51,6 +57,7 @@ PORT=8080 \
 REDIS_PORT=6379 \
 REDIS_HOST="localhost" \
 REDIS_PASSWORD="password" \
+MAVEN_OPTS="-Djava.security.manager -Djava.security.policy=./funk.policy" \
 mvn install exec:java
 ```
 
