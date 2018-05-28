@@ -4,6 +4,7 @@ import garden.bots.data.Data;
 import garden.bots.engines.JSEngine;
 import garden.bots.engines.KTEngine;
 import garden.bots.resources.FunctionPayload;
+import garden.bots.security.FunkSecurityManager;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rxjava.core.Vertx;
 import me.atrox.haikunator.Haikunator;
@@ -21,6 +22,9 @@ public class Main {
     config.put("http_port", httport);
 
     Vertx vertx = io.vertx.rxjava.core.Vertx.vertx();
+
+    //System.setSecurityManager(new FunkSecurityManager());
+
 
     //https://vertx.io/docs/vertx-redis-client/java/#_redis_sentinel
     vertx.eventBus().<JsonObject>consumer("io.vertx.redis.changes", received -> {
@@ -112,6 +116,21 @@ public class Main {
       .subscribe(
               v -> {
                 System.out.println("RedPipe server is started");
+
+                //SecurityManager securityManager = new SecurityManager();
+                SecurityManager securityManager = new FunkSecurityManager();
+                System.setSecurityManager(securityManager);
+
+
+                SecurityManager security = System.getSecurityManager();
+                if (security != null) {
+                  System.out.println("===== SECURITY MANAGER =====");
+                  //security.checkExit(status);
+                } else {
+                  System.out.println("===== NO SECURITY MANAGER =====");
+                }
+
+
                 Data.redis(vertx).publish("logs", Data.instanceName() + " started...",res -> {
                   //TODO if (res.succeeded()) {}
                 });
