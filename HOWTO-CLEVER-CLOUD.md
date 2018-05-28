@@ -12,8 +12,7 @@ Cleve-Clous is a PaaS: [https://www.clever-cloud.com/](https://www.clever-cloud.
 - Setup the environment variables:
 
 ```shell
-MAVEN_OPTS=-Djava.security.manager -Djava.security.policy=./funk.policy
-MAVEN_DEPLOY_GOAL=install exec:java
+MAVEN_DEPLOY_GOAL=-Djava.security.manager -Djava.security.policy=./funk.policy install exec:java
 JAVA_VERSION=8
 FUNK_TOKEN=panda
 PORT=8080
