@@ -4,7 +4,6 @@ import garden.bots.resources.FunctionPayload;
 import io.vavr.Function1;
 import io.vavr.control.Try;
 import io.vertx.core.json.JsonObject;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import rx.Single;
 
 import javax.script.Invocable;

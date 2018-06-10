@@ -11,7 +11,6 @@ import me.atrox.haikunator.Haikunator;
 import me.atrox.haikunator.HaikunatorBuilder;
 import net.redpipe.engine.core.Server;
 
-import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 

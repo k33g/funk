@@ -1,8 +1,6 @@
 package garden.bots.engines;
 
 import garden.bots.resources.FunctionPayload;
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
 
 import java.util.Date;
 
