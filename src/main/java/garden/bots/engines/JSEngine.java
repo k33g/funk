@@ -1,11 +1,9 @@
 package garden.bots.engines;
 
-import garden.bots.data.Data;
 import garden.bots.resources.FunctionPayload;
 import io.vavr.Function1;
 import io.vavr.control.Try;
 import io.vertx.core.json.JsonObject;
-import io.vertx.rxjava.core.Vertx;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import rx.Single;

@@ -36,13 +36,6 @@ public class Data {
 
   // synchronous part
 
-  /*
-  REDIS_HOST	bpvks2nlm-redis.services.clever-cloud.com
-REDIS_PASSWORD	2rVv7zbWO3Vt4iUAeZn
-REDIS_PORT	3082
-REDIS_URL	redis://:2rVv7zbWO3Vt4iUAeZn@bpvks2nlm-redis.services.clever-cloud.com:3082
-   */
-
   public static Jedis getSyncRedisClient() {
     if(redisAuth == null) {
       return new Jedis("redis://"+redisHost+":"+redisPort);

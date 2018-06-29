@@ -1,6 +1,7 @@
 package garden.bots.resources;
 
 import net.redpipe.engine.resteasy.FileResource;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;

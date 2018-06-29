@@ -1,7 +1,6 @@
 package garden.bots.token;
 
 import io.vavr.Function0;
-import io.vavr.Function1;
 import io.vavr.control.Try;
 import io.vertx.core.json.JsonObject;
 import rx.Single;
